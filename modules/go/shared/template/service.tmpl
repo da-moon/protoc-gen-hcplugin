@@ -1,0 +1,21 @@
+{{ define "Service" }}
+{{ $name := .ServiceName }}
+{{ $upper_camel_case := $name.UpperCamelCase }}
+{{ $lower_snake_case := $name.LowerSnakeCase }}
+{{ $protocol_version := .ProtocolVersion }}
+{{ $magic_cookie_key := .MagicCookieKey }}
+{{ $magic_cookie_value := .MagicCookieValue }}  
+
+// {{$upper_camel_case}}Interface - this is the interface that we're exposing as a plugin.
+type {{$upper_camel_case}}Interface interface { 
+	{{ range .Methods }} {{ $name := .Name }} {{ $upper_camel_case := $name.UpperCamelCase }} {{ $input_fields := .InputFields }} {{ $len_input_fields := len $input_fields }} {{ $output_fields := .OutputFields}} {{ $input_type := .InputType}} {{ $output_type := .OutputType}}
+	{{$upper_camel_case}}({{if $input_fields}}{{range  $i, $e := $input_fields}}{{$e.VariableName.Value.LowerCamelCase}}{{if builtin .VariableName.Value.LowerCamelCase }}_{{end}} {{$e.VariableName.Key.Original}}{{if $e.VariableType.Key.Original}}{{$e.VariableType.Key.Original}}.{{end}}{{$e.VariableType.Value.Original}}{{if ne ($i) (dec $len_input_fields 1)}},{{end}}{{end}}{{end}})({{range $output_fields}}{{.VariableName.Key.Original}}{{if .VariableType.Key.Original}}{{.VariableType.Key.Original}}.{{end}}{{.VariableType.Value.Original}},{{end}}error)
+    {{end}}
+}
+// HandshakeConfig - engine-interface handshake configuration
+var HandshakeConfig = plugin.HandshakeConfig{
+	ProtocolVersion:  {{$protocol_version}},
+	MagicCookieKey:   "{{$magic_cookie_key}}",
+	MagicCookieValue: "{{$magic_cookie_value}}",
+}
+{{ end }}

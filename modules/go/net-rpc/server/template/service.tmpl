@@ -1,0 +1,11 @@
+{{ define "Service" }}
+{{ $name := .ServiceName }}
+{{ $upper_camel_case := $name.UpperCamelCase }}
+// Server - This is the RPC server that Client talks to, conforming to the requirements of net/rpc
+type Server struct {
+	Impl shared.{{$upper_camel_case}}Interface
+}
+{{ range .Methods -}}
+ {{ template "Method" . }}
+{{end}}
+{{ end }}

@@ -1,0 +1,19 @@
+{{ define "Method" }}
+{{ $method_name := .Name }}
+{{ $service_name := .ServiceName }}
+{{ $upper_camel_case_method_name := $method_name.UpperCamelCase }}
+{{ $lower_camel_case_method_name := $method_name.LowerCamelCase }}
+{{ $upper_camel_case_service_name := $service_name.UpperCamelCase }}
+{{ $input_fields := .InputFields }}
+{{ $len_input_fields := len $input_fields }}
+{{ $output_fields := .OutputFields}}
+{{ $input_type := .InputType}}
+{{ $output_type := .OutputType}}
+// {{$upper_camel_case_method_name}}Impl - this function is called in the implmentation of {{$lower_camel_case_method_name}} operation and should be set by the developer
+var {{$upper_camel_case_method_name}}Impl func ({{if $input_fields}}{{range  $i, $e := $input_fields}}{{$e.VariableName.Value.LowerCamelCase}}{{if builtin .VariableName.Value.LowerCamelCase }}_{{end}} {{$e.VariableName.Key.Original}}{{if $e.VariableType.Key.Original}}{{$e.VariableType.Key.Original}}.{{end}}{{$e.VariableType.Value.Original}}{{if ne ($i) (dec $len_input_fields 1)}},{{end}}{{end}}{{end}})({{range $output_fields}}{{if .VariableType.Key.Original}}{{.VariableType.Key.Original}}.{{end}}{{.VariableType.Value.Original}},{{end}}error) 
+// {{$upper_camel_case_method_name}} - Implementation of {{$upper_camel_case_method_name}} method for go engine
+func ({{$upper_camel_case_service_name}}) {{$upper_camel_case_method_name}}({{if $input_fields}}{{range  $i, $e := $input_fields}}{{$e.VariableName.Value.LowerCamelCase}}{{if builtin .VariableName.Value.LowerCamelCase }}_{{end}} {{$e.VariableName.Key.Original}}{{if $e.VariableType.Key.Original}}{{$e.VariableType.Key.Original}}.{{end}}{{$e.VariableType.Value.Original}}{{if ne ($i) (dec $len_input_fields 1)}},{{end}}{{end}}{{end}})({{range $output_fields}}{{.VariableName.Key.Original}}{{if .VariableType.Key.Original}}{{.VariableType.Key.Original}}.{{end}}{{.VariableType.Value.Original}},{{end}}error) {
+   return {{$upper_camel_case_method_name}}Impl({{if $input_fields}}{{range  $i, $e := $input_fields}}{{$e.VariableName.Value.LowerCamelCase}}{{if builtin .VariableName.Value.LowerCamelCase }}_{{end}}{{if ne ($i) (dec $len_input_fields 1)}},{{end}}{{end}}{{end}})
+}
+{{ end }}
+

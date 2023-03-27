@@ -1,0 +1,10 @@
+{{ define "Service" }}
+{{ $service_name := .ServiceName }}
+{{ $upper_camel_case_service_name := $service_name.UpperCamelCase }}
+{{ $lower_snake_case_service_name := $service_name.LowerSnakeCase }}
+// Client - this is the client that talks to engine
+var Client shared.{{$upper_camel_case_service_name}}Interface
+{{ range .Methods -}}
+ {{ template "Method" . }}
+{{end}}
+{{ end }}

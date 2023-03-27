@@ -1,0 +1,11 @@
+{{ define "Service" }}
+{{ $name := .ServiceName }}
+{{ $upper_camel_case := $name.UpperCamelCase }}
+// Client is an implementation of shared.{{$upper_camel_case}} that talks over gRPC.
+type Client struct {
+	client base.{{$upper_camel_case}}Client
+}
+{{ range .Methods -}}
+ {{ template "Method" . }}
+{{end}}
+{{ end }}

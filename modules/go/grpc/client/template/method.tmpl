@@ -1,0 +1,22 @@
+{{ define "Method" }}
+{{ $name := .Name }}
+{{ $upper_camel_case := $name.UpperCamelCase }}
+{{ $input_fields := .InputFields }}
+{{ $len_input_fields := len $input_fields }}
+{{ $output_fields := .OutputFields}}
+{{ $input_type := .InputType}}
+{{ $output_type := .OutputType}}
+func (c *Client) {{$upper_camel_case}}({{if $input_fields}}{{range  $i, $e := $input_fields}}{{$e.VariableName.Value.LowerCamelCase}}{{if builtin .VariableName.Value.LowerCamelCase }}_{{end}} {{$e.VariableName.Key.Original}}{{if $e.VariableType.Key.Original}}{{$e.VariableType.Key.Original}}.{{end}}{{$e.VariableType.Value.Original}}{{if ne ($i) (dec $len_input_fields 1)}},{{end}}{{end}}{{end}})({{range $output_fields}}{{.VariableName.Key.Original}}{{if .VariableType.Key.Original}}{{.VariableType.Key.Original}}.{{end}}{{.VariableType.Value.Original}},{{end}}error) {
+    {{if $output_fields}}_resp, err := c.client.{{$upper_camel_case}}(context.Background(), &base.{{$input_type}} { {{if $input_fields}} {{range $input_fields}}
+    {{.VariableName.Value.Original}}{{if builtin .VariableName.Value.Original }}_{{end}}:{{.VariableName.Value.LowerCamelCase}}{{if builtin .VariableName.Value.LowerCamelCase }}_{{end}},{{end}}{{end}}
+    }) {{else}} _, err := c.client.{{$upper_camel_case}}(context.Background(), &base.{{$input_type}}{ {{if $input_fields}}{{range $input_fields}}{{.VariableName.Value.UpperCamelCase}}{{if builtin .VariableName.Value.Original }}_{{end}}: {{.VariableName.Value.LowerCamelCase}}{{if builtin .VariableName.Value.LowerCamelCase }}_{{end}},{{end}}
+    {{end}}}){{end}}
+        if err != nil {
+        err = stacktrace.Propagate(err , "{{$upper_camel_case}} call failed with request %#v",&base.{{$input_type}} { {{if $input_fields}}{{range $input_fields}}
+            {{.VariableName.Value.Original}}{{if builtin .VariableName.Value.Original }}{{end}}: {{.VariableName.Value.LowerCamelCase}}{{if builtin .VariableName.Value.LowerCamelCase }}_{{end}},{{end}}{{end}}
+        })
+    }
+   return {{if $output_fields}}{{range $output_fields}}_resp.{{.VariableName.Value.Original}}{{if builtin .VariableName.Value.Original }}_{{end}},{{end}}{{end}}err
+}
+{{ end }}
+

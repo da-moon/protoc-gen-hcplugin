@@ -1,0 +1,22 @@
+{{ define "Service" }}
+{{ $service_name := .ServiceName }}
+{{ $upper_camel_case_service_name := $service_name.UpperCamelCase }}
+{{ $lower_snake_case_service_name := $service_name.LowerSnakeCase }}
+{{ $lower_snake_case_service_name := $service_name.LowerSnakeCase }}
+// ServeConfig - This is the plugin config thet is used in main function of engine
+func ServeConfig() *plugin.ServeConfig{
+    return &plugin.ServeConfig{
+        HandshakeConfig: shared.HandshakeConfig,
+		Plugins: map[string]plugin.Plugin{
+			"{{$lower_snake_case_service_name}}": &grpc.Plugin{Impl:&{{$upper_camel_case_service_name}}{} },
+		},
+		// A non-nil value here enables gRPC serving for this plugin...
+		GRPCServer: plugin.DefaultGRPCServer,
+    }
+}
+// {{$upper_camel_case_service_name}} - this is the struct that implements engine operations
+type {{$upper_camel_case_service_name}} struct{}
+{{ range .Methods -}}
+ {{ template "Method" . }}
+{{end}}
+{{ end }}

@@ -1,0 +1,73 @@
+{{ define "Service" }}
+{{ $service_name := .ServiceName }}
+{{ $upper_camel_case_service_name := $service_name.UpperCamelCase }}
+{{ $lower_snake_case_service_name := $service_name.LowerSnakeCase }}
+{{ $lower_camel_case_service_name := $service_name.LowerCamelCase }}
+{{ $lower_param_case_service_name := $service_name.LowerParamCase }}
+{{ $usage := .Usage }}
+{{ $aliases := .Aliases }}
+{{ $len_aliases := len $aliases }}
+// {{$upper_camel_case_service_name}} - cli command based on service name
+var {{$upper_camel_case_service_name}} = []cli.Command{
+    {
+        Name:     "{{$lower_param_case_service_name}}",
+        Usage:    "{{$usage}}",
+        Aliases:  []string{ {{if $aliases}}{{range  $i, $e :=  $aliases}}{{if ne ($i) (dec $len_aliases 1)}}"{{$e}}",{{else}}"{{$e}}"{{end}}{{end}}{{end}} },
+        Flags: cli.FlagsByName{
+            cli.StringFlag{
+                Name:  "{{$lower_param_case_service_name}}-binary",
+                Usage: "{{$lower_param_case_service_name}} engine binary path",
+                Value: "",
+            },
+        },
+        Before:func (ctx *cli.Context) error{
+            // We don't want to see the plugin logs.
+            // log.SetOutput(ioutil.Discard)
+            // We're a host. Start by launching the plugin process.
+            path := ctx.String("{{$lower_param_case_service_name}}-binary")
+            if len(path) == 0 {
+                err:=stacktrace.NewError("{{$lower_param_case_service_name}} plugin engine binary path is empty")
+                fmt.Println(err)
+                return err
+            }
+            client := plugin.NewClient(&plugin.ClientConfig{
+                HandshakeConfig: shared.HandshakeConfig,
+                Plugins:         map[string]plugin.Plugin{
+                                    "{{$lower_snake_case_service_name}}_grpc" : &grpc.Plugin{},
+                                    "{{$lower_snake_case_service_name}}" : &rpc.Plugin{},
+                                },
+                Cmd:             exec.Command("sh", "-c", path),
+                AllowedProtocols: []plugin.Protocol{
+                    plugin.ProtocolNetRPC, plugin.ProtocolGRPC},
+            })
+            defer client.Kill()
+                // Connect via RPC
+                rpcClient, err := client.Client()
+                if err != nil {
+                    err = stacktrace.Propagate(err ,"Client failed to return the protocol client for {{$lower_snake_case_service_name}} engine connection")
+                    fmt.Println(err)
+                    return err
+                }
+                // Request the plugin
+                raw, err := rpcClient.Dispense("{{$lower_snake_case_service_name}}_grpc")
+                if err != nil {
+                    err = stacktrace.Propagate(err ,"RPC Client could not dispense a new instance of {{$lower_snake_case_service_name}}_grpc")
+                    fmt.Println(err)
+                    return err
+                }
+                // We should have a {{$lower_camel_case_service_name}} store now! This feels like a normal interface
+                // implementation but is in fact over an RPC connection.
+                handler.Client = raw.(shared.{{$upper_camel_case_service_name}}Interface)
+                return nil
+        },
+        
+        Subcommands: []cli.Command{
+			{{ range .Methods }}{{.Name.UpperCamelCase}},
+            {{end}}
+		},
+    },
+}
+{{ range .Methods -}}
+ {{ template "Method" . }}
+{{end}}
+{{ end }}

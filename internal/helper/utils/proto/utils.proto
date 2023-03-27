@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package = "utils";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+option (gogoproto.marshaler_all) = false;
+option (gogoproto.sizer_all) = false;
+option (gogoproto.unmarshaler_all) = false;
+message String {
+    string original = 1; 
+    string lower_camel_case = 2; 
+    string upper_camel_case = 3; 
+    string lower_snake_case = 4;
+    string upper_snake_case = 5;
+    string lower_dot_case = 6;
+    string upper_dot_case = 7;
+    string lower_param_case = 8;
+    string upper_param_case = 9;
+}
+message KV {
+    String key = 1[(gogoproto.nullable) = false]; 
+    String value = 2[(gogoproto.nullable) = false]; 
+}
+
+
+

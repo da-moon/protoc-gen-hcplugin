@@ -1,0 +1,28 @@
+{{ define "Method" }}
+{{ $method_name := .Name }}
+{{ $service_name := .ServiceName }}
+{{ $upper_camel_case_method_name := $method_name.UpperCamelCase }}
+{{ $lower_param_case_method_name := $method_name.LowerParamCase }}
+{{ $upper_camel_case_service_name := $service_name.UpperCamelCase }}
+{{ $lower_snake_case_service_name := $service_name.LowerSnakeCase }}
+{{ $lower_camel_case_service_name := $service_name.LowerCamelCase }}
+{{ $lower_param_case_service_name := $service_name.LowerParamCase }}
+
+{{ $input_fields := .InputFields }}
+{{ $len_input_fields := len $input_fields }}
+{{ $output_fields := .OutputFields}}
+{{ $input_type := .InputType}}
+{{ $output_type := .OutputType}}
+{{ $module_name := .Name }}
+{{ $usage := .Usage }}
+{{ $aliases := .Aliases }}
+{{ $len_aliases := len $aliases }}
+// {{$upper_camel_case_method_name}} - {{$upper_camel_case_method_name}} cli subcommand
+var {{$upper_camel_case_method_name}} = cli.Command{
+    Name:    "{{$lower_param_case_method_name}}",
+    Usage:    "{{$usage}}",
+    Aliases:  []string{ {{if $aliases}}{{range  $i, $e :=  $aliases}}{{if ne ($i) (dec $len_aliases 1)}}"{{$e}}",{{else}}"{{$e}}"{{end}}{{end}}{{end}} },
+    Action: handler.{{$upper_camel_case_method_name}},
+}
+{{ end }}
+

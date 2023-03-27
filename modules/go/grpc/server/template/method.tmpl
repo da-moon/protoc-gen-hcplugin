@@ -1,0 +1,25 @@
+{{ define "Method" }}
+{{ $name := .Name }}
+{{ $upper_camel_case := $name.UpperCamelCase }}
+{{ $input_fields := .InputFields }}
+{{ $len_input_fields := len $input_fields }}
+{{ $output_fields := .OutputFields}}
+{{ $input_type := .InputType}}
+{{ $output_type := .OutputType}}
+func (s *Server) {{$upper_camel_case}}(ctx context.Context, _req *base.{{$input_type}})(*base.{{$output_type}},error) {
+    {{if $output_fields}}{{range $output_fields}}{{.VariableName.Value.LowerCamelCase}}{{if builtin .VariableName.Value.LowerCamelCase }}_{{end}},{{end}}err := s.Impl.{{$upper_camel_case}}({{if $input_fields}} {{range $input_fields}}
+    _req.{{.VariableName.Value.Original}}{{if builtin .VariableName.Value.Original }}_{{end}},{{end}}{{end}}
+    ) {{else}} err := s.Impl.{{$upper_camel_case}}({{if $input_fields}} {{range $input_fields}}
+    _req.{{.VariableName.Value.Original}}{{if builtin .VariableName.Value.Original }}_{{end}},{{end}}{{end}}
+    ){{end}}
+        if err != nil {
+        err = stacktrace.Propagate(err , "{{$upper_camel_case}} call failed with request %#v",&base.{{$input_type}} { {{if $input_fields}}{{range $input_fields}}
+            {{.VariableName.Value.Original}}{{if builtin .VariableName.Value.Original }}{{end}}: _req.{{.VariableName.Value.Original}}{{if builtin .VariableName.Value.Original }}_{{end}},{{end}}{{end}}
+        })
+    }
+    return &base.{{$output_type}} { {{if $output_fields}}{{range $output_fields}}
+      {{.VariableName.Value.UpperCamelCase}}{{if builtin .VariableName.Value.Original }}_{{end}}:{{.VariableName.Value.LowerCamelCase}}{{if builtin .VariableName.Value.LowerCamelCase }}_{{end}},{{end}}{{end}} 
+    },nil 
+}
+{{ end }}
+

@@ -1,0 +1,26 @@
+{{ define "Service" }}
+{{ $name := .ServiceName }}
+{{ $upper_camel_case := $name.UpperCamelCase }}
+{{ $lower_snake_case := $name.LowerSnakeCase }}
+{{ $handshake := .Handshake }}
+{{ $protocol_version := $handshake.ProtocolVersion }}
+{{ $magic_cookie_key := $handshake.MagicCookieKey }}
+{{ $magic_cookie_value := $handshake.MagicCookieValue }}  
+// GRPCClient is an implementation of shared that talks over gRPC.
+type Plugin struct {
+    // Plugin must still implement the Plugin interface
+    plugin.Plugin
+    // Concrete implementation, written in Go. This is only used for plugins
+    // that are written in Go.
+	Impl shared.{{$upper_camel_case}}Interface
+}
+// GRPCClient - Required method to implement Plugin interface
+func (p *Plugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpcx.ClientConn) (interface{}, error) {
+    return &Client{client: base.New{{$upper_camel_case}}Client(c)}, nil
+}
+// GRPCServer - Required method to implement Plugin interface
+func (p *Plugin) GRPCServer(broker *plugin.GRPCBroker, s *grpcx.Server) error {
+    base.Register{{$upper_camel_case}}Server(s, &Server{Impl: p.Impl})
+    return nil
+}
+{{ end }}

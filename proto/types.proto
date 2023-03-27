@@ -1,0 +1,23 @@
+syntax = "proto3";
+option go_package = "pb";
+import "google/protobuf/descriptor.proto";
+
+message Handshake {
+    uint32 protocol_version = 1;
+    string magic_cookie_key = 2;
+    string magic_cookie_value = 3;
+}
+message CMD {
+    // override service name
+    string name = 1;
+    string usage = 2;
+    repeated string aliases = 3;
+}
+extend google.protobuf.ServiceOptions {
+    CMD cmd_service_options = 999996;
+    Handshake handshake = 999998;
+}
+
+extend google.protobuf.MethodOptions {
+    CMD cmd_method_options = 999999;
+}
